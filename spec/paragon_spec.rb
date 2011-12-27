@@ -1,36 +1,56 @@
-require 'rubygems'
-require 'rspec'
-require 'rest-client'
-require_relative 'couch_mapper'
+require 'spec_helper'
 
 COUCHDB_URL = "localhost:5984/new_mapper"
+CouchRest.delete(COUCHDB_URL)
 
-class NewMapper < CouchMapper
-  set_database COUCHDB_URL
+class NewMapper < Paragon
+  use_database CouchRest.database!(COUCHDB_URL)
 end
 
-def reset_db
-  RestClient.delete(COUCHDB_URL)
-end
+describe Paragon do
+  describe ".query" do
 
-describe NewMapper do
-  before :each do
-    reset_db
-  end
-  describe ".new" do
-    it "should initialize a new instance given the key value pairs passed" do
-      nm = NewMapper.new("attributes" => {"sample_field" => "a string field", "another_field" => 2})
-      nm.sample_field.should == "a string field"
-      nm.another_field.should == 2
+    before :each do
+      NewMapper.views_setup("by_id" => {"map" => "function(doc) { emit(doc._id, null) } "})
+      NewMapper.query(:all, :by_id, {:include_docs => true})
     end
+
+    it "returns a QueryResult object" do
+      NewMapper.query_all.should be_an_instance_of(QueryResult)
+    end
+
+    it "calls a specific view on a design doc" do
+      # expect
+      NewMapper.instance_variable_get("@design").should_receive(:view).with(:by_id, anything()).and_return({"total_rows"=>0, "offset"=>0, "rows"=>[]})
+
+      # when
+      NewMapper.query_all
+    end
+
+    it "defines new methods on the class" do
+      NewMapper.should respond_to(:query_all)
+    end
+
   end
+
+  it "should have CouchRest::Document as its ancestor" do
+    NewMapper.ancestors.should include(CouchRest::Document)
+  end
+
+  # describe ".new" do
+  #   it "should initialize a new instance given the key value pairs passed" do
+  #     nm = NewMapper.new({"sample_field" => "a string field", "another_field" => 2})
+  #     nm["sample_field"].should == "a string field"
+  #     nm["another_field"].should == 2
+  #   end
+  # end
 
   describe ".get" do
     it "should retrieve a document by id" do
-      RestClient.put(COUCHDB_URL + "/1234", {"some_key" => "some value"})
+      CouchRest.put(COUCHDB_URL + "/1234", {})
       nm = NewMapper.get("1234")
       nm.class.should == NewMapper
-      nm.some_key.should == "some value"
+      nm["_id"].should == "1234"
     end
     it "should return nil if no document exists" do
       nm = NewMapper.get("nonexistent")
@@ -38,34 +58,4 @@ describe NewMapper do
     end
   end
 
-  describe "#set_database" do
-    it "should setup a database object in NewMapper" do
-      class TestMapper < CouchMapper; set_database(COUCHDB_URL); end
-      TestMapper.database.class.should == CouchRest::Database
-    end
-    it "should warn when no database is present" do
-      class TestMapper < CouchMapper; end
-      lambda {TestMapper.database }.should raise_error(RuntimeError, "You must define a database connection with set_database")
-    end
-  end
-
-  describe "#save" do
-    context "a new document" do
-      it "should create a new document in the database" do
-        nm = NewMapper.new("attributes" => {"mapper_key" => "mapper_value", "_id" => "mapper1"}).save
-        rc = RestClient.get("mapper1")
-        rc.should != nil
-        rc.mapper_key.should == "mapper_value"
-      end
-    end
-    context "an existing document" do
-      it "should update the existing document from the database" do
-        RestClient.put(COUCHDB_URL + "/1234", {:some_key => "some value"})
-        nm = NewMapper.get("1234")
-        nm.new_key = "new_value"
-        nm.save
-        RestClient.get(COUCHDB_URL + "/1234")["new_key"].should == "new_value"
-      end
-    end
-  end
 end

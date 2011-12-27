@@ -16,8 +16,8 @@ class Paragon < CouchRest::Document
       meta.instance_eval {
         send(:define_method,"query_#{method.to_s}") do |*opts|
           results = @design.view(view, options.merge(opts.first || {}))
-          if options[:include_docs]
-            results["rows"].map! {|row| SimpleDoc.new(row["doc"]) }
+          if options[:include_docs] 
+            results["rows"].map! {|row| self.new(row["doc"]) }
           end
           QueryResult.new(results)
         end

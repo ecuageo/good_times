@@ -12,6 +12,7 @@ module DesignDocHelper
   end
 
   module ClassMethods
+
     def use_database(db)
       super
       @design =
