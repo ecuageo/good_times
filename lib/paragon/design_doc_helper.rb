@@ -35,6 +35,8 @@ module DesignDocHelper
       @design["views"] if @design
     end
 
+    private
+
     def initialize_design_doc(views)
       @design = CouchRest::Design.new
       @design.name = design_doc_name

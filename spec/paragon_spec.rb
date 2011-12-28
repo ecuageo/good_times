@@ -1,10 +1,7 @@
 require 'spec_helper'
 
-COUCHDB_URL = "localhost:5984/new_mapper"
-CouchRest.delete(COUCHDB_URL)
-
 class NewMapper < Paragon
-  use_database CouchRest.database!(COUCHDB_URL)
+  use_database TESTDB
 end
 
 describe Paragon do
@@ -37,17 +34,9 @@ describe Paragon do
     NewMapper.ancestors.should include(CouchRest::Document)
   end
 
-  # describe ".new" do
-  #   it "should initialize a new instance given the key value pairs passed" do
-  #     nm = NewMapper.new({"sample_field" => "a string field", "another_field" => 2})
-  #     nm["sample_field"].should == "a string field"
-  #     nm["another_field"].should == 2
-  #   end
-  # end
-
   describe ".get" do
     it "should retrieve a document by id" do
-      CouchRest.put(COUCHDB_URL + "/1234", {})
+      TESTDB.save_doc({"_id" => "1234"})
       nm = NewMapper.get("1234")
       nm.class.should == NewMapper
       nm["_id"].should == "1234"
