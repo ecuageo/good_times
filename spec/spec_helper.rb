@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'rspec'
 
-require 'paragon'
+require 'good_times'
 
 # Requires supporting files with custom matchers and macros, etc,
 # in ./support/ and its subdirectories.
@@ -15,7 +15,7 @@ RSpec.configure do |config|
 end
 
 COUCH_URL = "http://127.0.0.1:5984"
-TESTDB_NAME = "paragon-test"
+TESTDB_NAME = "good_times-test"
 TEST_SERVER = CouchRest.new(COUCH_URL)
 TESTDB = TEST_SERVER.database(TESTDB_NAME)
 

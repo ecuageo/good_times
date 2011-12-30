@@ -1,8 +1,8 @@
 require 'rubygems'
-require_relative 'lib/paragon'
-#require 'paragon'
+#require_relative 'lib/good_times'
+require 'good_times'
 
-class SimpleDoc < Paragon
+class SimpleDoc < GoodTimes
 
   use_database CouchRest.database!("127.0.0.1:5984/simple_doc")
 

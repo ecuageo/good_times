@@ -1,9 +1,9 @@
 require 'json/ext'
 require 'couchrest'
-require_relative 'paragon/query_result'
-require_relative 'paragon/design_doc_helper'
+require_relative 'good_times/query_result'
+require_relative 'good_times/design_doc_helper'
 
-class Paragon < CouchRest::Document
+class GoodTimes < CouchRest::Document
 
   include DesignDocHelper
 

@@ -1,10 +1,10 @@
 require 'spec_helper'
 
-class NewMapper < Paragon
+class NewMapper < GoodTimes
   use_database TESTDB
 end
 
-describe Paragon do
+describe GoodTimes do
   describe ".query" do
 
     before :each do
